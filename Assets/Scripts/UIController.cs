@@ -17,6 +17,7 @@ public class UIController : MonoBehaviour
     public void RestartGame()
     {
         // 시간 다시 흐르게 하고 현재 씬 다시 로드
+        // GameScene일때만 활성화, StartScene일 때는 비활성화하기
         Time.timeScale = 1f;
         Scene currentScene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(currentScene.name);
@@ -25,6 +26,17 @@ public class UIController : MonoBehaviour
     public void GoToMainMenu()
     {
         Time.timeScale = 1f;
-        //SceneManager.LoadScene("MainMenu"); // 메인 씬 이름에 맞게 수정!
+        SceneManager.LoadScene("StartScene"); 
+    }
+
+    public void StartBtn()
+    {
+        SceneManager.LoadScene("GameScene"); 
+    }
+
+    public void ExpBtn()
+    {
+        Time.timeScale = 1f;
+        //SceneManager.LoadScene("StartScene"); // 메인 씬 이름에 맞게 수정!
     }
 }
