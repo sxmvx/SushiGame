@@ -1,29 +1,42 @@
 using UnityEngine;
 using System.Collections;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class ChopstickController : MonoBehaviour
 {
-    public Animator animator; // 젓가락 애니메이터
-    private GameObject caughtSushi; // 충돌한 초밥 저장용
+    public Animator chopAnimator;
+    public Animator catAnimator;
+    private GameObject caughtSushi;
     public Vector3 targetPosition = new Vector3(-6.75f, -3f, 0f);
 
-    public int score = 0;
+    public int score = 0; // 현재 점수
     public TextMeshProUGUI ScoreText;
+
+    public float sushiSpeedIncreaseAmount = 2.0f;
+    public float spawnIntervalDecreaseAmount = 0.5f;
+    public int scoreIncreaseForNextLevel = 10; // 다음 난이도 목표 점수 증가량
 
     private void Start()
     {
-        animator = GetComponent<Animator>();
+        chopAnimator = GetComponent<Animator>();
+        score = 0;
         UpdateScoreUI();
+
+        if (catAnimator == null) Debug.LogError("Cat Animator가 인스펙터에서 연결되지 않았습니다! 확인해주세요.", this);
+        if (ScoreText == null) Debug.LogError("ScoreText (TextMeshProUGUI)가 인스펙터에서 연결되지 않았습니다!", this);
+        if (chopAnimator == null) Debug.LogError("Chop Animator가 이 GameObject에 없습니다! 확인해주세요.", this);
     }
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0)) // 화면 클릭 감지
+        if (Input.GetMouseButtonDown(0))
         {
-            animator.SetTrigger("clickTrigger"); // 애니메이션 실행
+            if (chopAnimator != null)
+            {
+                chopAnimator.SetTrigger("clickTrigger");
+            }
 
-            // 애니메이션 중에 충돌된 초밥 이동 (바로 실행 또는 Coroutine으로 약간 딜레이 가능)
             if (caughtSushi != null)
             {
                 Score();
@@ -52,13 +65,19 @@ public class ChopstickController : MonoBehaviour
     {
         bool matchFound = false;
 
-        foreach (var staticSushi in SushiGenerator.staticSushis)
+        if (SushiGenerator.staticSushis == null || SushiGenerator.staticSushis.Count == 0)
         {
-            // 이름 비교 (프리팹 이름 기준)
-            if (caughtSushi.name.Contains(staticSushi.name.Replace("(Clone)", "").Trim()))
+            Debug.LogWarning("SushiGenerator.staticSushis가 비어있거나 초기화되지 않았습니다. 초밥 비교 불가.");
+        }
+        else
+        {
+            foreach (var staticSushi in SushiGenerator.staticSushis)
             {
-                matchFound = true;
-                break;
+                if (staticSushi != null && caughtSushi.name.Contains(staticSushi.name.Trim()))
+                {
+                    matchFound = true;
+                    break;
+                }
             }
         }
 
@@ -66,13 +85,18 @@ public class ChopstickController : MonoBehaviour
         {
             score += 3;
             Debug.Log("정답! +3점");
+            if (catAnimator != null) catAnimator.SetTrigger("GetTrigger");
         }
         else
         {
             score -= 5;
             Debug.Log("오답! -5점");
+            if (catAnimator != null) catAnimator.SetTrigger("LoseTrigger");
         }
-        UpdateScoreUI(); // 점수 UI 갱신
+
+        UpdateScoreUI();
+
+        CheckDifficultyAndRestartGame();
     }
 
     private void UpdateScoreUI()
@@ -86,6 +110,45 @@ public class ChopstickController : MonoBehaviour
     private IEnumerator DestroySushiAfterDelay(GameObject sushi, float delay)
     {
         yield return new WaitForSeconds(delay);
-        Destroy(sushi);
+        if (sushi != null)
+        {
+            Destroy(sushi);
+        }
     }
+
+    private void CheckDifficultyAndRestartGame()
+    {
+        if (SushiGenerator.Instance != null && score >= SushiGenerator.Instance.CurrentScoreToIncreaseDifficulty)
+        {
+            Debug.Log($"점수 {score} 달성! 난이도 증가 및 게임 재시작 준비.");
+
+            if (SushiGenerator.Instance != null)
+            {
+                SushiGenerator.Instance.AdvanceDifficulty(sushiSpeedIncreaseAmount, spawnIntervalDecreaseAmount, scoreIncreaseForNextLevel);
+
+                Debug.Log($"ChopstickController: 난이도 상승 완료. 현재 레벨: {SushiGenerator.Instance.difficultyLevel}");
+            }
+
+            // 레벨이 5 이상이면 엔딩 씬으로 이동
+            if (SushiGenerator.Instance.difficultyLevel >= 5)
+            {
+                Debug.Log("레벨 5 도달! EndingScene으로 이동합니다.");
+
+                // SushiGenerator 제거
+                if (SushiGenerator.Instance != null)
+                {
+                    Destroy(SushiGenerator.Instance.gameObject); // 게임 오브젝트 제거
+                }
+
+                Time.timeScale = 1f;
+                SceneManager.LoadScene("EndingScene");
+            }
+            else
+            {
+                string currentSceneName = SceneManager.GetActiveScene().name;
+                SceneManager.LoadScene(currentSceneName);
+            }
+        }
+    }
+
 }
