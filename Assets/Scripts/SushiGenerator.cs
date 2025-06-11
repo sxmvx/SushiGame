@@ -2,9 +2,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
+using System.Collections;
 
 public class SushiGenerator : MonoBehaviour
 {
+    private TextMeshProUGUI levelText;
     public GameObject[] sushiPrefabs;
     public GameObject plate;
     private Vector3 spawnPosition = new Vector3(12f, 0.5f, 0f);
@@ -19,11 +22,9 @@ public class SushiGenerator : MonoBehaviour
     private float currentSpawnInterval;
     public float minSpawnInterval = 0.5f;
 
-    // --- 새로 추가된 난이도 관련 변수들 ---
     public int baseScoreToIncreaseDifficulty = 15; // 기본 난이도 상승 점수
     private int currentScoreToIncreaseDifficulty;  // 현재 난이도 상승 목표 점수
     public int difficultyLevel = 0; // 현재 난이도 레벨 (0부터 시작)
-    // ---
 
     public float CurrentSushiSpeed
     {
@@ -79,18 +80,33 @@ public class SushiGenerator : MonoBehaviour
                 Destroy(obj);
             }
         }
-        Debug.Log($"이전 움직이는 초밥/접시 오브젝트 {existingMovers.Length}개 파괴 완료.");
 
         CreateStaticSushi();
         Debug.Log("목표 초밥 재설정 완료.");
 
         InvokeRepeating("SpawnSushi", 1f, currentSpawnInterval);
         Debug.Log($"SpawnSushi InvokeRepeating 재시작. 현재 스폰 주기: {currentSpawnInterval}초.");
-    }
 
-    void Start()
-    {
-        // (기존 Start 내용)
+        // 레벨 텍스트 찾아서 보여주기
+        GameObject levelTextObj = GameObject.Find("LevelText");
+        if (levelTextObj != null)
+        {
+            levelText = levelTextObj.GetComponent<TextMeshProUGUI>();
+            if (levelText != null)
+            {
+                levelText.text = $"LEVEL {difficultyLevel + 1}"; // 0부터 시작하므로 +1
+                levelText.gameObject.SetActive(true);
+                StartCoroutine(HideLevelTextAfterDelay(2f));
+            }
+            else
+            {
+                Debug.LogWarning("LevelText 오브젝트는 찾았지만 TextMeshProUGUI 컴포넌트가 없습니다.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("LevelText 오브젝트를 씬에서 찾을 수 없습니다.");
+        }
     }
 
     public void SpawnSushi()
@@ -169,7 +185,6 @@ public class SushiGenerator : MonoBehaviour
         Debug.Log($"SushiGenerator: 초밥 생성 주기 감소! 현재 주기: {currentSpawnInterval}초");
     }
 
-    // --- 새로 추가된 난이도 관리 메서드 ---
     public void AdvanceDifficulty(float speedIncrease, float intervalDecrease, int scoreIncrease)
     {
         difficultyLevel++; // 난이도 레벨 증가
@@ -198,5 +213,14 @@ public class SushiGenerator : MonoBehaviour
 
         Debug.Log($"SushiGenerator: 게임 난이도 초기화! 속도: {currentSushiSpeed}, 주기: {currentSpawnInterval}, 목표 점수: {currentScoreToIncreaseDifficulty}, 레벨: {difficultyLevel}");
     }
-    // ---
+    
+    private IEnumerator HideLevelTextAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (levelText != null)
+        {
+            levelText.gameObject.SetActive(false);
+        }
+    }
+
 }
