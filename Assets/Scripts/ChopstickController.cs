@@ -12,6 +12,8 @@ public class ChopstickController : MonoBehaviour
 
     public int score = 0; // 현재 점수
     public TextMeshProUGUI ScoreText;
+    public TextMeshProUGUI LifeText;   // 목숨 UI
+    private int life = 3;              // 남은 목숨 수
 
     public float sushiSpeedIncreaseAmount = 2.0f;
     public float spawnIntervalDecreaseAmount = 0.5f;
@@ -27,7 +29,10 @@ public class ChopstickController : MonoBehaviour
         chopAnimator = GetComponent<Animator>();
         score = 0;
         UpdateScoreUI();
+        life = 3;
+        UpdateLifeUI();
 
+        if (LifeText == null) Debug.LogError("LifeText가 인스펙터에서 연결되지 않았습니다!", this);
         if (catAnimator == null) Debug.LogError("Cat Animator가 인스펙터에서 연결되지 않았습니다! 확인해주세요.", this);
         if (ScoreText == null) Debug.LogError("ScoreText (TextMeshProUGUI)가 인스펙터에서 연결되지 않았습니다!", this);
         if (chopAnimator == null) Debug.LogError("Chop Animator가 이 GameObject에 없습니다! 확인해주세요.", this);
@@ -50,8 +55,7 @@ public class ChopstickController : MonoBehaviour
                 // Chop sound 효과음 재생
                 if (audioSource != null)
                 {
-                    AudioSource ChopSound = GetComponent<AudioSource>();
-                    ChopSound.Play();
+                    audioSource.Play();
                 }
             }
 
@@ -117,10 +121,28 @@ public class ChopstickController : MonoBehaviour
             Debug.Log("오답! -5점");
             if (catAnimator != null) catAnimator.SetTrigger("LoseTrigger");
 
-            // 오답일 때의 효과음 재생
             if (audioSource != null && wrongSound != null)
             {
                 audioSource.PlayOneShot(wrongSound);
+            }
+
+            // 목숨 감소
+            life--;
+            UpdateLifeUI();
+
+            // 목숨 다 떨어졌으면 FailScene으로 이동
+            if (life <= 0)
+            {
+                Debug.Log("목숨이 모두 사라졌습니다! FailScene으로 이동합니다.");
+
+                if (SushiGenerator.Instance != null)
+                {
+                    Destroy(SushiGenerator.Instance.gameObject);
+                }
+
+                Time.timeScale = 1f;
+                SceneManager.LoadScene("FailScene");
+                return; // 더 이상 처리하지 않도록 return
             }
         }
 
@@ -179,5 +201,14 @@ public class ChopstickController : MonoBehaviour
                 SceneManager.LoadScene(currentSceneName);
             }
         }
+    }
+    private void UpdateLifeUI()
+    {
+        string[] hearts = new string[] { "♡", "♡", "♡" };
+        for (int i = 0; i < life; i++)
+        {
+            hearts[i] = "♥";
+        }
+        LifeText.text = string.Join(" ", hearts); // 예: ♥ ♥ ♡
     }
 }
