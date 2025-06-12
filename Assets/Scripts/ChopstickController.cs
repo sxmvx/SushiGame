@@ -17,6 +17,11 @@ public class ChopstickController : MonoBehaviour
     public float spawnIntervalDecreaseAmount = 0.5f;
     public int scoreIncreaseForNextLevel = 10; // 다음 난이도 목표 점수 증가량
 
+    // 효과음 관련 변수
+    public AudioClip correctSound;  // 정답일 때의 효과음
+    public AudioClip wrongSound;    // 오답일 때의 효과음
+    private AudioSource audioSource; // AudioSource 컴포넌트
+
     private void Start()
     {
         chopAnimator = GetComponent<Animator>();
@@ -26,6 +31,13 @@ public class ChopstickController : MonoBehaviour
         if (catAnimator == null) Debug.LogError("Cat Animator가 인스펙터에서 연결되지 않았습니다! 확인해주세요.", this);
         if (ScoreText == null) Debug.LogError("ScoreText (TextMeshProUGUI)가 인스펙터에서 연결되지 않았습니다!", this);
         if (chopAnimator == null) Debug.LogError("Chop Animator가 이 GameObject에 없습니다! 확인해주세요.", this);
+
+        // AudioSource 컴포넌트 연결
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            Debug.LogError("AudioSource가 이 GameObject에 없습니다! 확인해주세요.", this);
+        }
     }
 
     private void Update()
@@ -35,6 +47,12 @@ public class ChopstickController : MonoBehaviour
             if (chopAnimator != null)
             {
                 chopAnimator.SetTrigger("clickTrigger");
+                // Chop sound 효과음 재생
+                if (audioSource != null)
+                {
+                    AudioSource ChopSound = GetComponent<AudioSource>();
+                    ChopSound.Play();
+                }
             }
 
             if (caughtSushi != null)
@@ -86,12 +104,24 @@ public class ChopstickController : MonoBehaviour
             score += 3;
             Debug.Log("정답! +3점");
             if (catAnimator != null) catAnimator.SetTrigger("GetTrigger");
+
+            // 정답일 때의 효과음 재생
+            if (audioSource != null && correctSound != null)
+            {
+                audioSource.PlayOneShot(correctSound);
+            }
         }
         else
         {
             score -= 5;
             Debug.Log("오답! -5점");
             if (catAnimator != null) catAnimator.SetTrigger("LoseTrigger");
+
+            // 오답일 때의 효과음 재생
+            if (audioSource != null && wrongSound != null)
+            {
+                audioSource.PlayOneShot(wrongSound);
+            }
         }
 
         UpdateScoreUI();
@@ -103,7 +133,7 @@ public class ChopstickController : MonoBehaviour
     {
         if (ScoreText != null)
         {
-            ScoreText.text = "Score: " + score;
+            ScoreText.text = "점수 " + score;
         }
     }
 
@@ -150,5 +180,4 @@ public class ChopstickController : MonoBehaviour
             }
         }
     }
-
 }
