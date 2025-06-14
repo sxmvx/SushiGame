@@ -37,7 +37,7 @@
 
 ## 🛠️ 개발 환경
 
-- **Engine**: Unity 6000.0.39ㄹ1
+- **Engine**: Unity 6000.0.39f1
 - **Language**: C#
 - **툴**: GitHub, GitHub Desktop, Visual Studio
 
