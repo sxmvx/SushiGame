@@ -24,6 +24,9 @@ public class ChopstickController : MonoBehaviour
     public AudioClip wrongSound;    // 오답일 때의 효과음
     private AudioSource audioSource; // AudioSource 컴포넌트
 
+    public UnityEngine.UI.Toggle soundToggle; // 인스펙터에서 연결
+    private bool isSoundOn = true;            // 기본값 ON
+
     private void Start()
     {
         chopAnimator = GetComponent<Animator>();
@@ -53,7 +56,7 @@ public class ChopstickController : MonoBehaviour
             {
                 chopAnimator.SetTrigger("clickTrigger");
                 // Chop sound 효과음 재생
-                if (audioSource != null)
+                if (audioSource != null && isSoundOn)
                 {
                     audioSource.Play();
                 }
@@ -110,7 +113,7 @@ public class ChopstickController : MonoBehaviour
             if (catAnimator != null) catAnimator.SetTrigger("GetTrigger");
 
             // 정답일 때의 효과음 재생
-            if (audioSource != null && correctSound != null)
+            if (audioSource != null && correctSound != null && isSoundOn)
             {
                 audioSource.PlayOneShot(correctSound);
             }
@@ -121,7 +124,7 @@ public class ChopstickController : MonoBehaviour
             Debug.Log("오답! -5점");
             if (catAnimator != null) catAnimator.SetTrigger("LoseTrigger");
 
-            if (audioSource != null && wrongSound != null)
+            if (audioSource != null && wrongSound != null && isSoundOn)
             {
                 audioSource.PlayOneShot(wrongSound);
             }
@@ -149,6 +152,18 @@ public class ChopstickController : MonoBehaviour
         UpdateScoreUI();
 
         CheckDifficultyAndRestartGame();
+    }
+
+    public void OnSoundToggleChanged(bool isOn)
+    {
+        isSoundOn = isOn;
+
+        if (audioSource != null)
+        {
+            audioSource.mute = !isOn; // 직접 뮤트 처리도 가능
+        }
+
+        Debug.Log("효과음 " + (isOn ? "켜짐" : "꺼짐"));
     }
 
     private void UpdateScoreUI()

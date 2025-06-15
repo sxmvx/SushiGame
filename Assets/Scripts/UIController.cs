@@ -1,42 +1,50 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;  // Slider를 사용하려면 추가해야 합니다.
+using UnityEngine.UI;
 
 public class UIController : MonoBehaviour
 {
     public GameObject settingPanel;
     public GameObject ExpPanel;
-    public Slider volumeSlider; // Slider를 연결할 변수
-    private AudioSource audioSource; // AudioSource 변수 추가
+    public AudioSource bgmSource; // BGM 오브젝트의 AudioSource를 인스펙터에서 연결
+    private bool isBGMOn = true;
+    public Toggle bgmToggle;      // 토글 UI
 
     void Start()
-    {/*
-        // AudioSource 컴포넌트를 찾아서 설정
-        audioSource = FindObjectOfType<AudioSource>();
+    {
+        if (bgmSource == null)
+            bgmSource = GetComponent<AudioSource>();
 
-        // 시작 시, 기존 볼륨 값 설정 (PlayerPrefs에서 불러오기)
-        if (audioSource != null)
+        // 토글 상태에 맞춰 배경음악 켜기/끄기
+        bgmToggle.onValueChanged.AddListener(OnBgmToggleChanged);
+
+        if (bgmToggle.isOn)
         {
-            audioSource.volume = PlayerPrefs.GetFloat("Volume", 1f); // 기본값은 1
-            volumeSlider.value = audioSource.volume; // 슬라이더의 초기 값 설정
+            if (!bgmSource.isPlaying)
+                bgmSource.Play();
+            bgmSource.mute = false;
         }
-
-        // Slider의 ValueChanged 이벤트에 리스너 추가
-        if (volumeSlider != null)
+        else
         {
-            volumeSlider.onValueChanged.AddListener(OnVolumeChanged);
-        }/*/
+            bgmSource.Pause();
+            bgmSource.mute = true;
+        }
     }
 
-    // 볼륨 변경 시 호출되는 메서드
-    /*public void OnVolumeChanged(float value)
+    void OnBgmToggleChanged(bool isOn)
     {
-        if (audioSource != null)
+        if (isOn)
         {
-            audioSource.volume = value; // 볼륨 조절
-            PlayerPrefs.SetFloat("Volume", value); // 변경된 볼륨 저장
+            bgmSource.mute = false;
+            if (!bgmSource.isPlaying)
+                bgmSource.Play();
         }
-    }*/
+        else
+        {
+            bgmSource.Pause();
+            bgmSource.mute = true;
+        }
+    }
 
     public void TogglePanel()
     {
