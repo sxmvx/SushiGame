@@ -27,6 +27,8 @@ public class ChopstickController : MonoBehaviour
     public UnityEngine.UI.Toggle soundToggle; // 인스펙터에서 연결
     private bool isSoundOn = true;            // 기본값 ON
 
+    public UIController uiController;  // 인스펙터에서 연결
+
     private void Start()
     {
         chopAnimator = GetComponent<Animator>();
@@ -50,30 +52,35 @@ public class ChopstickController : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (uiController != null && uiController.IsSettingsPanelOpen)
+            return;
+        else
         {
-            if (chopAnimator != null)
+            if (Input.GetMouseButtonDown(0))
             {
-                chopAnimator.SetTrigger("clickTrigger");
-                // Chop sound 효과음 재생
-                if (audioSource != null && isSoundOn)
+                if (chopAnimator != null)
                 {
-                    audioSource.Play();
+                    chopAnimator.SetTrigger("clickTrigger");
+                    // Chop sound 효과음 재생
+                    if (audioSource != null && isSoundOn)
+                    {
+                        audioSource.Play();
+                    }
                 }
-            }
 
-            if (caughtSushi != null)
-            {
-                Score();
+                if (caughtSushi != null)
+                {
+                    Score();
 
-                caughtSushi.transform.position = targetPosition;
+                    caughtSushi.transform.position = targetPosition;
 
-                SushiMover mover = caughtSushi.GetComponent<SushiMover>();
-                if (mover != null) mover.canMove = false;
+                    SushiMover mover = caughtSushi.GetComponent<SushiMover>();
+                    if (mover != null) mover.canMove = false;
 
-                StartCoroutine(DestroySushiAfterDelay(caughtSushi, 3f));
+                    StartCoroutine(DestroySushiAfterDelay(caughtSushi, 3f));
 
-                caughtSushi = null;
+                    caughtSushi = null;
+                }
             }
         }
     }

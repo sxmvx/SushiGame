@@ -9,6 +9,8 @@ public class UIController : MonoBehaviour
     public AudioSource bgmSource; // BGM 오브젝트의 AudioSource를 인스펙터에서 연결
     private bool isBGMOn = true;
     public Toggle bgmToggle;      // 토글 UI
+    public GameObject settingsPanel;
+    public bool IsSettingsPanelOpen => settingsPanel != null && settingsPanel.activeSelf;
 
     void Start()
     {

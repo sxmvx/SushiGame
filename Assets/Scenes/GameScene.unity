@@ -588,6 +588,7 @@ MonoBehaviour:
   ExpPanel: {fileID: 0}
   bgmSource: {fileID: 342797575}
   bgmToggle: {fileID: 2079093100}
+  settingsPanel: {fileID: 0}
 --- !u!4 &342797574
 Transform:
   m_ObjectHideFlags: 0
@@ -2699,7 +2700,8 @@ MonoBehaviour:
   scoreIncreaseForNextLevel: 5
   correctSound: {fileID: 8300000, guid: 9d8706ac996c8014dbd4430b789f58d7, type: 3}
   wrongSound: {fileID: 8300000, guid: 00a8c1293928e0144b1b8fc55b8cb403, type: 3}
-  soundToggle: {fileID: 0}
+  soundToggle: {fileID: 1813522636}
+  uiController: {fileID: 342797573}
 --- !u!50 &1639056432
 Rigidbody2D:
   serializedVersion: 5
