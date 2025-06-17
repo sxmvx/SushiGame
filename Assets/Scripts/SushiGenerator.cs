@@ -13,24 +13,27 @@ public class SushiGenerator : MonoBehaviour
     private Vector3 spawnPosition = new Vector3(12f, 0.5f, 0f);
     private Vector3 spawnPosition2 = new Vector3(12f, 0f, 0f);
 
+    // 움직이지 않는 초밥(목표 초밥) 저장
     public static List<GameObject> staticSushis = new List<GameObject>();
 
-    public float initialSushiSpeed = 2f;
-    private float currentSushiSpeed;
+    public float initialSushiSpeed = 2f;    // 기본 초밥 이동 속도
+    private float currentSushiSpeed;    // 현재 이동 속도
 
-    public float initialSpawnInterval = 2f;
-    private float currentSpawnInterval;
-    public float minSpawnInterval = 0.5f;
+    public float initialSpawnInterval = 2f;     // 기본 초밥 생성 텀
+    private float currentSpawnInterval;     // 현재 초밥 생성 텀
+    public float minSpawnInterval = 0.5f;   // 초밥 생성 텀의 감소값
 
     public int baseScoreToIncreaseDifficulty = 15; // 기본 난이도 상승 점수
     private int currentScoreToIncreaseDifficulty;  // 현재 난이도 상승 목표 점수
     public int difficultyLevel = 0; // 현재 난이도 레벨 (0부터 시작)
 
+    // 현재 초밥 이동 속도 저장
     public float CurrentSushiSpeed
     {
         get { return currentSushiSpeed; }
     }
 
+    // 현재 초밥 생성 텀 저장
     public float CurrentSpawnInterval
     {
         get { return currentSpawnInterval; }
@@ -40,6 +43,7 @@ public class SushiGenerator : MonoBehaviour
 
     void Awake()
     {
+        // 게임 재시작시 이전 오브젝트 제거
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
